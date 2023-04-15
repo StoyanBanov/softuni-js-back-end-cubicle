@@ -1,3 +1,4 @@
+const { createAccessory } = require('../services/accessoryService')
 const { createCubicle } = require('../services/cubiclesService')
 const router = require('express').Router()
 
@@ -11,6 +12,21 @@ router.post('/', async (req, res) => {
     try {
         const cubicle = await createCubicle(req.body)
         res.redirect('/' + cubicle.id)
+    } catch (error) {
+
+    }
+})
+
+router.get('/accessory', (req, res) => {
+    res.render('createAccessory', {
+        title: 'Create Accessory'
+    })
+})
+
+router.post('/accessory', async (req, res) => {
+    try {
+        await createAccessory(req.body)
+        res.redirect('/')
     } catch (error) {
 
     }

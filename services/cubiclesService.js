@@ -1,6 +1,30 @@
-const fs = require('fs')
-const dataDir = './models/data.json'
+//const fs = require('fs')
+//const dataDir = './models/data.json'
+const Cubicle = require('../models/Cubicle')
 
+async function getAllCubicles(search, from, to, ids) {
+    const data = await Cubicle.find({}).lean()
+    search = search.toLowerCase()
+    return data.filter(c => c.name.toLowerCase().includes(search) || c.description.toLowerCase().includes(search))
+        .filter(({ difficulty }) => difficulty >= from && difficulty <= to)
+}
+
+async function getCubicleById(id) {
+    return Cubicle.findById(id).lean()
+}
+
+async function createCubicle(CubicleData) {
+    const cubicle = new Cubicle({
+        "name": CubicleData.name,
+        "description": CubicleData.description,
+        "imageUrl": CubicleData.imageUrl,
+        "difficulty": Number(CubicleData.difficultyLevel)
+    })
+    await cubicle.save()
+    return cubicle.lean()
+}
+
+/*
 const data = JSON.parse(fs.readFileSync(dataDir))
 
 function updateDataBase() {
@@ -34,6 +58,7 @@ async function createCubicle(CubicleData) {
     await updateDataBase()
     return cubicle
 }
+*/
 
 module.exports = {
     getAllCubicles,
