@@ -10,7 +10,7 @@ async function getAllCubicles(search, from, to, ids) {
 }
 
 async function getCubicleById(id) {
-    return Cubicle.findById(id).lean()
+    return Cubicle.findById(id).populate('accessories').lean()
 }
 
 async function createCubicle(CubicleData) {

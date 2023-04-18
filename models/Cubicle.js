@@ -5,7 +5,8 @@ const schema = new Schema({
     description: { type: String, required: true, maxLength: 200 },
     imageUrl: { type: String, required: true },
     difficulty: { type: Number, required: true, min: 1, max: 6 },
-    accessories: { type: [ObjectId], default: [], ref: 'Accessory' }
+    accessories: { type: [ObjectId], default: [], ref: 'Accessory' },
+    creatorId: { type: ObjectId, required: true }
 })
 
 schema.path('imageUrl').validate(function () {
