@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const cubicle = await createCubicle(req.body)
+        const cubicle = await createCubicle(req.body, req.user._id)
         res.redirect('/' + cubicle.id)
     } catch (error) {
 

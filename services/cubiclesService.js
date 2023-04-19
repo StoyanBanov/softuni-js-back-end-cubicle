@@ -13,15 +13,30 @@ async function getCubicleById(id) {
     return Cubicle.findById(id).populate('accessories').lean()
 }
 
-async function createCubicle(CubicleData) {
+async function createCubicle(CubicleData, creatorId) {
     const cubicle = new Cubicle({
         "name": CubicleData.name,
         "description": CubicleData.description,
         "imageUrl": CubicleData.imageUrl,
-        "difficulty": Number(CubicleData.difficultyLevel)
+        "difficulty": Number(CubicleData.difficultyLevel),
+        "creatorId": creatorId
     })
     await cubicle.save()
-    return cubicle.lean()
+    return cubicle
+}
+
+async function updateCubicle(CubicleData, id) {
+    const cubicle = await Cubicle.findById(id)
+    cubicle["name"] = CubicleData.name
+    cubicle["description"] = CubicleData.description
+    cubicle["imageUrl"] = CubicleData.imageUrl
+    cubicle["difficulty"] = Number(CubicleData.difficultyLevel)
+    await cubicle.save()
+    return cubicle
+}
+
+async function deleteCubicle(id) {
+    await Cubicle.findByIdAndDelete(id)
 }
 
 /*
@@ -63,5 +78,7 @@ async function createCubicle(CubicleData) {
 module.exports = {
     getAllCubicles,
     getCubicleById,
-    createCubicle
+    createCubicle,
+    updateCubicle,
+    deleteCubicle
 }

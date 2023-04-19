@@ -1,14 +1,19 @@
 const authController = require('express').Router()
-const jwt = require('jsonwebtoken')
+const { guestOnly, userOnly } = require('../middleware/guards')
 const { login, register } = require('../services/authService')
 
-authController.get('/login', (req, res) => {
+authController.get('/logout', userOnly(), (req, res) => {
+    res.clearCookie('jwt')
+    res.redirect('/')
+})
+
+authController.get('/login', guestOnly(), (req, res) => {
     res.render('loginPage', {
         title: 'Login Page'
     })
 })
 
-authController.post('/login', async (req, res) => {
+authController.post('/login', guestOnly(), async (req, res) => {
     try {
         const user = await login(req.body.username, req.body.password)
         req.signJwt(user)
@@ -18,13 +23,13 @@ authController.post('/login', async (req, res) => {
     }
 })
 
-authController.get('/register', (req, res) => {
+authController.get('/register', guestOnly(), (req, res) => {
     res.render('registerPage', {
         title: 'Register Page'
     })
 })
 
-authController.post('/register', async (req, res) => {
+authController.post('/register', guestOnly(), async (req, res) => {
     try {
         if (Object.values(req.body).some(v => v == '') || req.body.password.trim() != req.body.repeatPassword.trim()) throw new Error('')
         const user = await register(req.body.username, req.body.password)
@@ -35,9 +40,8 @@ authController.post('/register', async (req, res) => {
     }
 })
 
-authController.get('/logout', (req, res) => {
-    res.clearCookie('jwt')
-    res.redirect('/')
+authController.all('/*', (req, res, next) => {
+    next()
 })
 
 module.exports = authController
