@@ -1,3 +1,12 @@
+{{#if errorsObj}}
+<div id="notifications">
+    <p id="notification-message">
+        {{#each errorsObj.messages}}
+        {{this}}<br>
+        {{/each}}
+    </p>
+</div>
+{{/if}}
 <h1>Login Form</h1>
 <div class="form">
     <form action="/login" method="POST">

@@ -1,8 +1,17 @@
+{{#if errorsObj}}
+<div id="notifications">
+    <p id="notification-message">
+        {{#each errorsObj.messages}}
+        {{this}}<br>
+        {{/each}}
+    </p>
+</div>
+{{/if}}
 <h1>Register Form</h1>
 <div class="form">
     <form action="/register" method="POST">
         <label for="username">Username</label>
-        <input type="text" id="username" name="username">
+        <input type="text" id="username" name="username" value="{{username}}">
 
         <label for="password">Password</label>
         <input type="password" id="password" name="password">

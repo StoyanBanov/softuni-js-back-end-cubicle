@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 
 async function login(username, password) {
     const user = await User.findOne({ 'username': username })
-    if (await bcrypt.compare(password, user.password))
+    if (user && await bcrypt.compare(password, user.password))
         return {
             _id: user._id,
             username
