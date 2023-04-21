@@ -17,22 +17,18 @@ authController.get('/login', guestOnly(), (req, res) => {
 
 authController.post('/login', guestOnly(),
     body(['username', 'password', 'repeatPassword']).trim(),
-    body(['username', 'password']).isLength({ min: 1 }).withMessage('All fields are required!'),
     async (req, res) => {
+        const { errors } = validationResult(req)
         try {
-            const { errors } = validationResult(req)
-            try {
-                const user = await login(req.body.username, req.body.password)
-                req.signJwt(user)
-            } catch (error) {
-                errors.push(...parseOtherErrToExpressValidatorErr(error))
-            }
+            const user = await login(req.body.username, req.body.password)
+            req.signJwt(user)
             if (errors.length > 0) throw errors
             res.redirect('/')
         } catch (error) {
+            if (!Array.isArray(error)) errors.push(...parseOtherErrToExpressValidatorErr(error))
             res.render('loginPage', {
                 title: 'Login Page',
-                errorsObj: parseErr(error)
+                errorsObj: parseErr(errors)
             })
         }
     })
@@ -52,20 +48,17 @@ authController.post('/register', guestOnly(),
         .custom((v, { req }) => req.body.password == v)
         .withMessage('Passwords don\'t match!'),
     async (req, res) => {
+        const { errors } = validationResult(req)
         try {
-            const { errors } = validationResult(req)
-            try {
-                const user = await register(req.body.username, req.body.password)
-                req.signJwt(user)
-            } catch (error) {
-                errors.push(...parseOtherErrToExpressValidatorErr(error))
-            }
+            const user = await register(req.body.username, req.body.password)
+            req.signJwt(user)
             if (errors.length > 0) throw errors
             res.redirect('/')
         } catch (error) {
+            if (!Array.isArray(error)) errors.push(...parseOtherErrToExpressValidatorErr(error))
             res.render('registerPage', {
                 title: 'Register Page',
-                errorsObj: parseErr(error),
+                errorsObj: parseErr(errors),
                 body: {
                     username: req.username
                 }

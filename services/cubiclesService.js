@@ -2,7 +2,7 @@
 //const dataDir = './models/data.json'
 const Cubicle = require('../models/Cubicle')
 
-async function getAllCubicles(search, from, to, ids) {
+async function getAllCubicles(search, from, to) {
     const data = await Cubicle.find({}).lean()
     search = search.toLowerCase()
     return data.filter(c => c.name.toLowerCase().includes(search) || c.description.toLowerCase().includes(search))

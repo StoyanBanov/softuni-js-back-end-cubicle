@@ -1,15 +1,12 @@
 const { getAllMissingAccessoriesForCube, addAccessoryToCube } = require('../services/accessoryService')
 const { getAllCubicles, getCubicleById, updateCubicle, deleteCubicle } = require('../services/cubiclesService')
 const { userOnly } = require('../middleware/guards');
+const { body, validationResult } = require('express-validator');
+const { parseErr, parseOtherErrToExpressValidatorErr } = require('../util/errorParser');
 
 const router = require('express').Router()
 
-const difficulties = [{ value: "1", text: '1 - Very Easy' },
-{ value: "2", text: '2 - Easy' },
-{ value: "3", text: '3 - Medium (Standard 3x3)' },
-{ value: "4", text: '4 - Intermediate' },
-{ value: "5", text: '5 - Expert' },
-{ value: "6", text: '6 - Hardcore' }]
+const { difficulties } = require('../util/selectAccessory')
 
 router.get('/', async (req, res) => {
     const search = req.query.search || ''
@@ -44,18 +41,39 @@ router.get('/edit/:id', userOnly(), async (req, res) => {
             cubicle
         })
     } catch (error) {
+        res.render('404', {
+            title: 'Page Not Found'
+        })
     }
 })
 
-router.post('/edit/:id', userOnly(), async (req, res) => {
-    try {
+router.post('/edit/:id', userOnly(),
+    body(['name', 'description', 'imageUrl']).trim(),
+    async (req, res) => {
+        const { errors } = validationResult(req)
         const cubicleId = req.params.id
-        await updateCubicle(req.body, cubicleId)
-        res.redirect('/' + cubicleId)
-    } catch (error) {
-        console.log(error.message);
-    }
-})
+        try {
+            await updateCubicle(req.body, cubicleId)
+            res.redirect('/' + cubicleId)
+        } catch (error) {
+            if (!Array.isArray(error)) errors.push(...parseOtherErrToExpressValidatorErr(error))
+            res.render('editCubePage', {
+                title: 'Edit Page',
+                cubicle: {
+                    _id: cubicleId,
+                    name: req.body.name,
+                    description: req.body.description,
+                    imageUrl: req.body.imageUrl,
+                    difficulties: difficulties.map((o, i) => {
+                        if (i + 1 == req.body.difficultyLevel) o.selected = 'selected'
+                        else o.selected = ''
+                        return o
+                    })
+                },
+                errorsObj: parseErr(errors)
+            })
+        }
+    })
 
 router.get('/delete/:id', userOnly(), async (req, res) => {
     try {
@@ -67,6 +85,9 @@ router.get('/delete/:id', userOnly(), async (req, res) => {
             cubicle
         })
     } catch (error) {
+        res.render('404', {
+            title: 'Page Not Found'
+        })
     }
 })
 
@@ -75,7 +96,9 @@ router.post('/delete/:id', userOnly(), async (req, res) => {
         await deleteCubicle(req.params.id)
         res.redirect('/')
     } catch (error) {
-        console.log(error.message);
+        res.render('404', {
+            title: 'Page Not Found'
+        })
     }
 })
 
@@ -98,13 +121,19 @@ router.get('/:id', async (req, res) => {
 router.use(userOnly())
 
 router.get('/attach/accessory/:cubeId', async (req, res) => {
-    const cubeId = req.params.cubeId
-    const accessories = await getAllMissingAccessoriesForCube(cubeId)
-    res.render('attachAccessory', {
-        title: 'Attach Accessory',
-        accessories,
-        cubeId
-    })
+    try {
+        const cubeId = req.params.cubeId
+        const accessories = await getAllMissingAccessoriesForCube(cubeId)
+        res.render('attachAccessory', {
+            title: 'Attach Accessory',
+            accessories,
+            cubeId
+        })
+    } catch (error) {
+        res.render('404', {
+            title: 'Page Not Found'
+        })
+    }
 })
 
 router.post('/attach/accessory/:cubeId', async (req, res) => {
@@ -112,7 +141,9 @@ router.post('/attach/accessory/:cubeId', async (req, res) => {
         await addAccessoryToCube(req.body.accessory, req.params.cubeId)
         res.redirect(`/attach/accessory/${req.params.cubeId}`)
     } catch (error) {
-
+        res.render('404', {
+            title: 'Page Not Found'
+        })
     }
 })
 
