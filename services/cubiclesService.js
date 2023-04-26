@@ -3,10 +3,10 @@
 const Cubicle = require('../models/Cubicle')
 
 async function getAllCubicles(search, from, to) {
-    const data = await Cubicle.find({}).lean()
-    search = search.toLowerCase()
-    return data.filter(c => c.name.toLowerCase().includes(search) || c.description.toLowerCase().includes(search))
-        .filter(({ difficulty }) => difficulty >= from && difficulty <= to)
+    const regex = new RegExp(search, 'i')
+    return await Cubicle.find({})
+        .where({ $or: [{ name: { $regex: regex } }, { description: { $regex: regex } }] })
+        .where('difficulty').gte(from).lte(to).lean()
 }
 
 async function getCubicleById(id) {

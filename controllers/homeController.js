@@ -1,6 +1,6 @@
 const { getAllMissingAccessoriesForCube, addAccessoryToCube } = require('../services/accessoryService')
 const { getAllCubicles, getCubicleById, updateCubicle, deleteCubicle } = require('../services/cubiclesService')
-const { userOnly } = require('../middleware/guards');
+const { userOnly, ownerOnly } = require('../middleware/guards');
 const { body, validationResult } = require('express-validator');
 const { parseErr, parseOtherErrToExpressValidatorErr } = require('../util/errorParser');
 
@@ -28,7 +28,7 @@ router.get('/about', (req, res) => {
     })
 })
 
-router.get('/edit/:id', userOnly(), async (req, res) => {
+router.get('/edit/:id', userOnly(), ownerOnly(), async (req, res) => {
     try {
         const cubicle = await getCubicleById(req.params.id)
         cubicle.difficulties = difficulties.map((o, i) => {
@@ -47,7 +47,7 @@ router.get('/edit/:id', userOnly(), async (req, res) => {
     }
 })
 
-router.post('/edit/:id', userOnly(),
+router.post('/edit/:id', userOnly(), ownerOnly(),
     body(['name', 'description', 'imageUrl']).trim(),
     async (req, res) => {
         const { errors } = validationResult(req)
@@ -75,7 +75,7 @@ router.post('/edit/:id', userOnly(),
         }
     })
 
-router.get('/delete/:id', userOnly(), async (req, res) => {
+router.get('/delete/:id', userOnly(), ownerOnly(), async (req, res) => {
     try {
         const cubicle = await getCubicleById(req.params.id)
         cubicle.difficultyText = difficulties.find(o => o.value == cubicle.difficulty).text
@@ -91,7 +91,7 @@ router.get('/delete/:id', userOnly(), async (req, res) => {
     }
 })
 
-router.post('/delete/:id', userOnly(), async (req, res) => {
+router.post('/delete/:id', userOnly(), ownerOnly(), async (req, res) => {
     try {
         await deleteCubicle(req.params.id)
         res.redirect('/')
@@ -118,7 +118,7 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-router.use(userOnly())
+router.use(userOnly(), ownerOnly())
 
 router.get('/attach/accessory/:cubeId', async (req, res) => {
     try {

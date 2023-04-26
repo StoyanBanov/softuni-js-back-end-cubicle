@@ -12,7 +12,17 @@ const userOnly = () => (req, res, next) => {
     next()
 }
 
+function ownerOnly(creatorId) {
+    return (req, res, next) => {
+        if (req.user._id != creatorId) {
+            return res.redirect('/')
+        }
+        next()
+    }
+}
+
 module.exports = {
     guestOnly,
-    userOnly
+    userOnly,
+    ownerOnly
 }
