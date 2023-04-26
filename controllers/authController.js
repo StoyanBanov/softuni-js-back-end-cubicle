@@ -60,7 +60,7 @@ authController.post('/register', guestOnly(),
                 title: 'Register Page',
                 errorsObj: parseErr(errors),
                 body: {
-                    username: req.username
+                    username: req.body.username
                 }
             })
         }
