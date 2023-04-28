@@ -50,9 +50,9 @@ authController.post('/register', guestOnly(),
     async (req, res) => {
         const { errors } = validationResult(req)
         try {
+            if (errors.length > 0) throw errors
             const user = await register(req.body.username, req.body.password)
             req.signJwt(user)
-            if (errors.length > 0) throw errors
             res.redirect('/')
         } catch (error) {
             if (!Array.isArray(error)) errors.push(...parseOtherErrToExpressValidatorErr(error))
